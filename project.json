@@ -10,7 +10,7 @@
   },
   "schemaVersion": "3.2",
   "studioVersion": "18.4.0.6",
-  "projectVersion": "1.0.6916.38030",
+  "projectVersion": "1.0.6917.21690",
   "runtimeOptions": {
     "autoDispose": false,
     "excludedLoggedData": [
@@ -27,6 +27,12 @@
     "input": [
       {
         "name": "inputFolder",
+        "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+        "required": false,
+        "hasDefault": true
+      },
+      {
+        "name": "outputCSVFile",
         "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
         "required": false,
         "hasDefault": true

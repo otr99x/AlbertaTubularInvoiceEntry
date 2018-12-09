@@ -15,12 +15,18 @@
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="inputFolder" Type="InArgument(x:String)" />
+    <x:Property Name="outputCSVFile" Type="InArgument(x:String)" />
   </x:Members>
   <this:Main.inputFolder>
     <InArgument x:TypeArguments="x:String">
       <Literal x:TypeArguments="x:String" Value="" />
     </InArgument>
   </this:Main.inputFolder>
+  <this:Main.outputCSVFile>
+    <InArgument x:TypeArguments="x:String">
+      <Literal x:TypeArguments="x:String" Value="" />
+    </InArgument>
+  </this:Main.outputCSVFile>
   <mva:VisualBasic.Settings>
     <x:Null />
   </mva:VisualBasic.Settings>
@@ -81,7 +87,33 @@
     <Sequence.Variables>
       <Variable x:TypeArguments="sd:DataTable" Name="uInvoiceDT" />
       <Variable x:TypeArguments="x:String" Name="uInvoiceFolder" />
+      <Variable x:TypeArguments="x:String" Name="outputInvoice" />
     </Sequence.Variables>
+    <If Condition="[outputCSVFile = &quot;&quot;]">
+      <If.Then>
+        <Assign>
+          <Assign.To>
+            <OutArgument x:TypeArguments="x:String">[outputInvoice]</OutArgument>
+          </Assign.To>
+          <Assign.Value>
+            <InArgument x:TypeArguments="x:String">C:\Users\jcheung\Desktop\important\invoicelist.csv</InArgument>
+          </Assign.Value>
+          <sap2010:WorkflowViewState.IdRef>Assign_6</sap2010:WorkflowViewState.IdRef>
+        </Assign>
+      </If.Then>
+      <If.Else>
+        <Assign>
+          <Assign.To>
+            <OutArgument x:TypeArguments="x:String">[outputInvoice]</OutArgument>
+          </Assign.To>
+          <Assign.Value>
+            <InArgument x:TypeArguments="x:String">[outputCSVFile]</InArgument>
+          </Assign.Value>
+          <sap2010:WorkflowViewState.IdRef>Assign_7</sap2010:WorkflowViewState.IdRef>
+        </Assign>
+      </If.Else>
+      <sap2010:WorkflowViewState.IdRef>If_2</sap2010:WorkflowViewState.IdRef>
+    </If>
     <If Condition="[inputFolder = &quot;&quot;]" sap2010:WorkflowViewState.IdRef="If_1">
       <If.Then>
         <Sequence sap2010:WorkflowViewState.IdRef="Sequence_14">
@@ -361,18 +393,16 @@
                     <DoWhile DisplayName="Do While" sap2010:WorkflowViewState.IdRef="DoWhile_4" Condition="[writeCSVFail = True]">
                       <TryCatch DisplayName="Try Catch" sap2010:WorkflowViewState.IdRef="TryCatch_3">
                         <TryCatch.Try>
-                          <Sequence>
-                            <ui:WriteCsvFile Encoding="{x:Null}" AddHeaders="True" DataTable="[uInvoiceDT]" Delimitator="Comma" DisplayName="Write CSV" FilePath="C:\Users\jcheung\Desktop\important\mydata.csv" sap2010:WorkflowViewState.IdRef="WriteCsvFile_2" />
-                            <Assign>
+                          <Sequence sap2010:WorkflowViewState.IdRef="Sequence_16">
+                            <ui:WriteCsvFile Encoding="{x:Null}" AddHeaders="True" DataTable="[uInvoiceDT]" Delimitator="Comma" DisplayName="Write CSV" FilePath="[outputInvoice]" sap2010:WorkflowViewState.IdRef="WriteCsvFile_2" />
+                            <Assign sap2010:WorkflowViewState.IdRef="Assign_5">
                               <Assign.To>
                                 <OutArgument x:TypeArguments="x:Boolean">[writeCSVFail]</OutArgument>
                               </Assign.To>
                               <Assign.Value>
                                 <InArgument x:TypeArguments="x:Boolean">False</InArgument>
                               </Assign.Value>
-                              <sap2010:WorkflowViewState.IdRef>Assign_5</sap2010:WorkflowViewState.IdRef>
                             </Assign>
-                            <sap2010:WorkflowViewState.IdRef>Sequence_16</sap2010:WorkflowViewState.IdRef>
                           </Sequence>
                         </TryCatch.Try>
                         <TryCatch.Catches>
@@ -408,10 +438,13 @@
       <x:Reference>__ReferenceID6</x:Reference>
       <x:Reference>__ReferenceID7</x:Reference>
     </Flowchart>
-    <sads:DebugSymbol.Symbol>d0ZDOlxVc2Vyc1xqY2hldW5nXERvY3VtZW50c1xVaVBhdGhcQWxiZXJ0YVR1YnVsYXJJbnZvaWNlRW50cnlcTWFpbi54YW1seRUHFTYBAlADnAMOAgEBVQV/CgIBe4ABBdwCEQIBHN0CBZoDEQIBAlUTVTECAXxXCXMUAwGDAXYJfRICAX6CATaCAXoCAR2GAQuGAZ8OAgF4iQEPkgEkAgFxlQETmQEjAgFvnAEXxQIkAgEgyAIbzAIxAgEe4AIL4AJ3AgEZ4wIPkwMbAgEDWAtY8AEDAY8BWQtyFQMBhAF7NHtBAwGBAXg1eEUCAX+GASiGATYCAXmJAeQBiQGdAgIBd4kBkgGJAaYBAgF1iQGvAokBwQICAXOPARWPAV8CAXKVAfIBlQH2AQIBcJwBqgGcAdABAgFuogEdwgIoAgEhygJ1ygKzAQIBH+ACYuACdAIBGuUCQeUCSAIBBOkCFY8DHwIBBVhHWGsDAZEBWLoBWN4BAwGQAVl2WZcBAwGNAVoNcRgDAYUBowEfwQIqAgEi6QJr6QKCAQIBF+oCF44DIgIBBlwRXJsBAwGKAWQVbR4DAYYBpQFPpQFSAgElqAEnqAFWAgEkrQEnrQFWAgEjsQEhsQGMAQIBa7IBIfEBLAIBUfIBIYkCMgIBR4oCIaMCLAIBPKQCIaQCxwECATilAiGsAjECAS+tAiGtAp0BAgEtrgIhwAIyAgEm7AIb+AImAgEOgAMfigMqAgEHXIYBXJgBAwGLAWobakoDAYkBZkFmUQMBhwGxAXixAYkBAgFsswEjxQE0AgFkxgEj2AE0AgFd2QEj8AE0AgFS8gGiAvIBkQMCAVD4ASeGAjICAUiLAiOiAjQCAT2kAkykAmECATukAmykAnoCATmqAmKqAnkCATaoAmKoAm4CATSnAmCnAnUCATKpAl2pAmwCATCtAnitApoBAgEurgKiAq4CkQMCASy0Aie9AjICASftAh3tAoUCAgET7gId9gImAgEPgQMhiAMqAgEKiQMhiQOOAgIBCLMBsgKzAZADAgFquQEpwgE0AgFlxgHrAcYBmgICAWPMASnVATQCAV7ZAaoC2QHmAgIBXN8BKe0BNAIBU/kBKYQCPQIBTIUCKYUCvAECAUmLAvkBiwLoAgIBRpECKZ8CNAIBPrUCKbwCNAIBKO0CXu0CbAIBFe0CogHtAtEBAgEU8wJJ8wJOAgES8AJK8AJYAgEQhgNNhgNRAgENgwNOgwNcAgELiQO2AYkD/AECAQm6ASvBATYCAWbNASvUATYCAV/gASvkATkCAVjlASvsATYCAVT7AaIB+wH+AgIBT4ICVYICbAIBTYUCgAGFArkBAgFKkgIrnQI/AgFCngIrngK6AQIBP7oCvAG6AoMCAgErtwJWtwJaAgEqtwJItwJNAgEpvwG+Ab8BuwICAWm8AVe8AVsCAWi8AUq8AU4CAWfSAb4B0gGOAgIBYs8BV88BWwIBYc8BSs8BTgIBYOIBvgHiAdsBAgFb4AG8AuABzQICAVnqAb4B6gHuAQIBV+cBV+cBWwIBVucBSucBTgIBVZQCpAGUAoADAgFFmwJXmwJsAgFDngKCAZ4CtwECAUA=</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>d0ZDOlxVc2Vyc1xqY2hldW5nXERvY3VtZW50c1xVaVBhdGhcQWxiZXJ0YVR1YnVsYXJJbnZvaWNlRW50cnlcTWFpbi54YW1sggEbBxs2AQMWBxY2AQJWA7oDDgIBAVwFdAoDAZMBdQWfAQoCAXygAQX8AhECAR39AgW4AxECAQJcE1wzAwGUAV4JZhIDAZsBaQlxEgMBlgF1E3UxAgF9dwmTARQDAYQBlgEJnQESAgF/ogE2ogF6AgEepgELpgGfDgIBeakBD7IBJAIBcrUBE7kBIwIBcLwBF+UCJAIBIegCG+wCMQIBH4ADC4ADdwIBGoMDD7EDGwIBA2M0Y2YDAZ4BYDVgRAMBnAFuNG5DAwGZAWs1a0QDAZcBeAt48AEDAZABeQuSARUDAYUBmwE0mwFBAwGCAZgBNZgBRQMBgAGmASimATYCAXqpAeQBqQGdAgIBeKkBkgGpAaYBAgF2qQGvAqkBwQICAXSvARWvAV8CAXO1AfIBtQH2AQIBcbwBqgG8AdABAgFvwgEd4gIoAgEi6gJ16gKzAQIBIIADYoADdAIBG4UDQYUDSAIBBIkDFa0DHwIBBXhHeGsDAZIBeLoBeN4BAwGRAXl2eZcBAwGOAXoNkQEYAwGGAcMBH+ECKgIBI4kDa4kDggECARiKAxesAyICAQZ8EXybAQMBiwGEARWNAR4DAYcBxQFPxQFSAgEmyAEnyAFWAgElzQEnzQFWAgEk0QEh0QGMAQIBbNIBIZECLAIBUpICIakCMgIBSKoCIcMCLAIBPcQCIcQCxwECATnFAiHMAjECATDNAiHNAp0BAgEuzgIh4AIyAgEnjAMblgMmAgEOngMfqAMqAgEHfIYBfJgBAwGMAYoBG4oBSgMBigGGAUGGAVEDAYgB0QF40QGJAQIBbdMBI+UBNAIBZeYBI/gBNAIBXvkBI5ACNAIBU5ICogKSApEDAgFRmAInpgIyAgFJqwIjwgI0AgE+xAJMxAJhAgE8xAJsxAJ6AgE6ygJiygJ5AgE3yAJiyAJuAgE1xwJgxwJ1AgEzyQJdyQJsAgExzQJ4zQKaAQIBL84CogLOApEDAgEt1AIn3QIyAgEojQMdjQPnAQIBE44DHZUDJgIBD58DIaYDKgIBCqcDIacDjgICAQjTAbIC0wGQAwIBa9kBKeIBNAIBZuYB6wHmAZoCAgFk7AEp9QE0AgFf+QGqAvkB5gICAV3/ASmNAjQCAVSZAimkAj0CAU2lAimlArwBAgFKqwL5AasC6AICAUexAim/AjQCAT/VAincAjQCASmNA16NA2wCARaNA6IBjQOzAQIBFJMDSZMDTgIBEpADSpADWAIBEKQDTaQDUQIBDaEDTqEDXAIBC6cDtgGnA/wBAgEJ2gEr4QE2AgFn7QEr9AE2AgFggAIrhAI5AgFZhQIrjAI2AgFVmwKiAZsC/gICAVCiAlWiAmwCAU6lAoABpQK5AQIBS7ICK70CPwIBQ74CK74CugECAUDaArwB2gKDAgIBLNcCVtcCWgIBK9cCSNcCTQIBKt8BvgHfAbsCAgFq3AFX3AFbAgFp3AFK3AFOAgFo8gG+AfIBjgICAWPvAVfvAVsCAWLvAUrvAU4CAWGCAr4BggLbAQIBXIACvAKAAs0CAgFaigK+AYoC7gECAViHAleHAlsCAVeHAkqHAk4CAVa0AqQBtAKAAwIBRrsCV7sCbAIBRL4CggG+ArcBAgFB</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
+      <sap2010:ViewStateData Id="Assign_6" sap:VirtualizedContainerService.HintSize="242,60" />
+      <sap2010:ViewStateData Id="Assign_7" sap:VirtualizedContainerService.HintSize="242,60" />
+      <sap2010:ViewStateData Id="If_2" sap:VirtualizedContainerService.HintSize="509,208" />
       <sap2010:ViewStateData Id="MessageBox_3" sap:VirtualizedContainerService.HintSize="314,59">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -458,7 +491,14 @@
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="Assign_3" sap:VirtualizedContainerService.HintSize="242,60" />
-      <sap2010:ViewStateData Id="If_1" sap:VirtualizedContainerService.HintSize="603,422" />
+      <sap2010:ViewStateData Id="If_1" sap:VirtualizedContainerService.HintSize="509,51">
+        <sap:WorkflowViewStateService.ViewState>
+          <scg:Dictionary x:TypeArguments="x:String, x:Object">
+            <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+            <x:Boolean x:Key="IsPinned">False</x:Boolean>
+          </scg:Dictionary>
+        </sap:WorkflowViewStateService.ViewState>
+      </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="BuildDataTable_1" sap:VirtualizedContainerService.HintSize="200,51">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -665,7 +705,7 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="Flowchart_1" sap:VirtualizedContainerService.HintSize="603,51">
+      <sap2010:ViewStateData Id="Flowchart_1" sap:VirtualizedContainerService.HintSize="509,51">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">False</x:Boolean>
@@ -700,7 +740,7 @@
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="Assign_4" sap:VirtualizedContainerService.HintSize="314,60" />
       <sap2010:ViewStateData Id="MessageBox_4" sap:VirtualizedContainerService.HintSize="314,59" />
-      <sap2010:ViewStateData Id="Sequence_15" sap:VirtualizedContainerService.HintSize="336,283">
+      <sap2010:ViewStateData Id="Sequence_15" sap:VirtualizedContainerService.HintSize="336,280">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
@@ -774,14 +814,14 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="Sequence_2" sap:VirtualizedContainerService.HintSize="625,728">
+      <sap2010:ViewStateData Id="Sequence_2" sap:VirtualizedContainerService.HintSize="531,605">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="Main_1" sap:VirtualizedContainerService.HintSize="665,808" />
+      <sap2010:ViewStateData Id="Main_1" sap:VirtualizedContainerService.HintSize="571,685" />
     </sap2010:ViewStateManager>
   </sap2010:WorkflowViewState.ViewStateManager>
 </Activity>
